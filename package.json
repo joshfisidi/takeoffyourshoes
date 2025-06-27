@@ -1,0 +1,23 @@
+{
+  "name": "takeoffyourshoes",
+  "version": "1.0.0",
+  "description": "take off your shoes sign",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshfisidi/takeoffyourshoes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshfisidi/takeoffyourshoes/issues"
+  },
+  "homepage": "https://github.com/joshfisidi/takeoffyourshoes#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
