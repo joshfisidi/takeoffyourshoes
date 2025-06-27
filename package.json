@@ -1,16 +1,18 @@
 {
   "name": "takeoffyourshoes",
   "version": "1.0.0",
-  "description": "take off your shoes sign",
-  "main": "index.js",
+  "description": "Take off your shoes sign with photo marquee",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joshfisidi/takeoffyourshoes.git"
   },
-  "keywords": [],
+  "keywords": ["shoes", "sign", "marquee", "photos", "supabase"],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -19,5 +21,14 @@
   "homepage": "https://github.com/joshfisidi/takeoffyourshoes#readme",
   "dependencies": {
     "express": "^5.1.0"
-  }
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }

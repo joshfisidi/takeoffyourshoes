@@ -32,8 +32,6 @@ const imageUrls = [
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_4796.jpeg',
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_4812.jpeg',
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_4922.jpeg',
-  'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_4922.jpeg',
-  'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_4922.jpeg',
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_4929.jpeg',
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_5443.jpeg',
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_5614.jpeg',
@@ -58,76 +56,34 @@ const imageUrls = [
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_9331.jpeg',
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_9693.jpeg',
   'https://diecvqobuorelaybbnko.supabase.co/storage/v1/object/public/guma//IMG_9752.jpeg',
-
-
 ];
 
 // Remove duplicates from imageUrls array
 const uniqueImageUrls = [...new Set(imageUrls)];
 
-// Lazy loading setup
-let imageObserver;
-
-// Initialize the Intersection Observer for lazy loading
-const initializeLazyLoading = () => {
-  const options = {
-    root: null, // Use viewport as root
-    rootMargin: '100px', // Start loading 100px before image comes into view
-    threshold: 0.1
-  };
-
-  imageObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        const src = img.getAttribute('data-src');
-        
-        if (src) {
-          // Create a new image to preload
-          const imageLoader = new Image();
-          
-          imageLoader.onload = () => {
-            // Once loaded, set the src and add fade-in effect
-            img.src = src;
-            img.removeAttribute('data-src');
-            img.classList.remove('lazy-loading');
-            img.classList.add('lazy-loaded');
-            
-            // Stop observing this image
-            imageObserver.unobserve(img);
-          };
-          
-          imageLoader.onerror = () => {
-            // Handle loading error with a placeholder or retry
-            img.classList.remove('lazy-loading');
-            img.classList.add('lazy-error');
-            imageObserver.unobserve(img);
-          };
-          
-          // Start loading the image
-          imageLoader.src = src;
-        }
-      }
-    });
-  }, options);
+// Get responsive image dimensions based on screen size
+const getImageDimensions = () => {
+  const width = window.innerWidth;
+  if (width <= 480) {
+    return { width: 80, height: 60, margin: 4 }; // Small mobile
+  } else if (width <= 768) {
+    return { width: 120, height: 90, margin: 8 }; // Large mobile/small tablet
+  } else if (width <= 1024) {
+    return { width: 160, height: 120, margin: 12 }; // Tablet
+  } else {
+    return { width: 192, height: 112, margin: 16 }; // Desktop
+  }
 };
 
-// Create placeholder image data URL (small gray rectangle)
-const createPlaceholder = () => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 192; // w-48
-  canvas.height = 112; // h-28
-  const ctx = canvas.getContext('2d');
-  
-  // Create gradient placeholder
-  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-  gradient.addColorStop(0, '#f3f4f6');
-  gradient.addColorStop(1, '#e5e7eb');
-  
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  return canvas.toDataURL();
+// Calculate how many images fit in viewport width
+const getImagesNeededForViewport = () => {
+  const { width, margin } = getImageDimensions();
+  const imageWidth = width + (margin * 2);
+  const viewportWidth = window.innerWidth;
+  const imagesInView = Math.ceil(viewportWidth / imageWidth);
+  // Add extra images for seamless scrolling (2x viewport width for mobile, 3x for desktop)
+  const multiplier = window.innerWidth <= 768 ? 2 : 3;
+  return imagesInView * multiplier;
 };
 
 // Fisher-Yates shuffle algorithm
@@ -140,15 +96,6 @@ const shuffleArray = (array) => {
   return shuffled;
 };
 
-// Calculate how many images fit in viewport width
-const getImagesNeededForViewport = () => {
-  const imageWidth = 200; // 192px (w-48) + 16px margin (mx-2 * 2)
-  const viewportWidth = window.innerWidth;
-  const imagesInView = Math.ceil(viewportWidth / imageWidth);
-  // Add extra images for seamless scrolling (3x viewport width)
-  return imagesInView * 3;
-};
-
 // Create a randomized sequence with no adjacent duplicates
 const createRandomizedSequence = (baseArray, targetLength) => {
   const sequence = [];
@@ -156,12 +103,10 @@ const createRandomizedSequence = (baseArray, targetLength) => {
   let lastImage = null;
   
   for (let i = 0; i < targetLength; i++) {
-    // If we've used all images, reshuffle and continue
     if (availableImages.length === 0) {
       availableImages.push(...shuffleArray(baseArray));
     }
     
-    // Find an image that's different from the last one
     let selectedIndex = 0;
     if (lastImage && availableImages.length > 1) {
       do {
@@ -179,33 +124,105 @@ const createRandomizedSequence = (baseArray, targetLength) => {
   return sequence;
 };
 
+// Create placeholder image data URL
+const createPlaceholder = (width, height) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, '#f3f4f6');
+  gradient.addColorStop(1, '#e5e7eb');
+  
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  return canvas.toDataURL();
+};
+
+// Lazy loading setup
+let imageObserver;
+
+const initializeLazyLoading = () => {
+  const options = {
+    root: null,
+    rootMargin: '50px',
+    threshold: 0.1
+  };
+
+  imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        const src = img.getAttribute('data-src');
+        
+        if (src) {
+          const imageLoader = new Image();
+          
+          imageLoader.onload = () => {
+            img.src = src;
+            img.removeAttribute('data-src');
+            img.classList.remove('lazy-loading');
+            img.classList.add('lazy-loaded');
+            imageObserver.unobserve(img);
+          };
+          
+          imageLoader.onerror = () => {
+            img.classList.remove('lazy-loading');
+            img.classList.add('lazy-error');
+            imageObserver.unobserve(img);
+          };
+          
+          imageLoader.src = src;
+        }
+      }
+    });
+  }, options);
+};
+
 const createMarqueeRow = (rowIndex, reverse = false, slower = false) => {
   const imagesNeeded = getImagesNeededForViewport();
-  
-  // Create a unique randomized sequence for this row
+  const { width, height, margin } = getImageDimensions();
   const randomizedImages = createRandomizedSequence(uniqueImageUrls, imagesNeeded);
   
   const row = document.createElement('div');
-  row.className = `marquee-row ${reverse ? 'reverse' : ''} ${slower ? 'slower' : ''} w-full h-36 items-center`;
-  row.style.marginBottom = '0.5rem';
-  row.style.marginTop = '0.5rem';
+  row.className = `marquee-row ${reverse ? 'reverse' : ''} ${slower ? 'slower' : ''} w-full items-center`;
   
-  const placeholder = createPlaceholder();
+  // Responsive row height
+  if (window.innerWidth <= 480) {
+    row.style.height = '60px';
+    row.style.marginBottom = '4px';
+    row.style.marginTop = '4px';
+  } else if (window.innerWidth <= 768) {
+    row.style.height = '90px';
+    row.style.marginBottom = '6px';
+    row.style.marginTop = '6px';
+  } else {
+    row.style.height = '112px';
+    row.style.marginBottom = '8px';
+    row.style.marginTop = '8px';
+  }
+  
+  const placeholder = createPlaceholder(width, height);
   
   randomizedImages.forEach((src, index) => {
     const img = document.createElement('img');
     
-    // Set up lazy loading
-    img.src = placeholder; // Start with placeholder
-    img.setAttribute('data-src', src); // Store real URL for lazy loading
+    img.src = placeholder;
+    img.setAttribute('data-src', src);
     img.alt = '';
-    img.className = 'rounded-xl shadow-lg mx-2 w-48 h-28 object-cover select-none pointer-events-none lazy-loading';
+    img.className = 'rounded-lg shadow-md object-cover select-none pointer-events-none lazy-loading';
     img.setAttribute('draggable', 'false');
     
-    // Add loading state styles
+    // Responsive image sizing
+    img.style.width = `${width}px`;
+    img.style.height = `${height}px`;
+    img.style.marginLeft = `${margin}px`;
+    img.style.marginRight = `${margin}px`;
+    
     img.style.transition = 'opacity 0.3s ease-in-out';
     
-    // Observe this image for lazy loading
     if (imageObserver) {
       imageObserver.observe(img);
     }
@@ -217,7 +234,6 @@ const createMarqueeRow = (rowIndex, reverse = false, slower = false) => {
 };
 
 const initializeMarquee = () => {
-  // Initialize lazy loading first
   initializeLazyLoading();
   
   const marqueeRows = [
@@ -237,14 +253,16 @@ const initializeMarquee = () => {
 initializeMarquee();
 
 // Reinitialize on window resize to adjust image count
+let resizeTimeout;
 window.addEventListener('resize', () => {
-  // Disconnect existing observer
-  if (imageObserver) {
-    imageObserver.disconnect();
-  }
-  
-  marqueeBg.innerHTML = '';
-  initializeMarquee();
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (imageObserver) {
+      imageObserver.disconnect();
+    }
+    marqueeBg.innerHTML = '';
+    initializeMarquee();
+  }, 250); // Debounce resize events
 });
 
 // Add CSS for lazy loading states
@@ -252,11 +270,13 @@ const style = document.createElement('style');
 style.textContent = `
   .lazy-loading {
     opacity: 0.7;
+    -webkit-filter: blur(1px);
     filter: blur(1px);
   }
   
   .lazy-loaded {
     opacity: 1;
+    -webkit-filter: none;
     filter: none;
   }
   

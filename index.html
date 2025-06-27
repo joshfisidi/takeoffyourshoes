@@ -2,33 +2,106 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
     <title>Welcome To Our Home</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      /* Safari mobile optimizations */
+      * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      
+      html {
+        -webkit-overflow-scrolling: touch;
+        -webkit-text-size-adjust: 100%;
+      }
+      
+      body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* Marquee animations with Safari prefixes */
       .marquee-row {
         display: flex;
         width: max-content;
+        -webkit-animation: marquee-left 30s linear infinite;
         animation: marquee-left 30s linear infinite;
       }
+      
       .marquee-row.reverse {
+        -webkit-animation: marquee-right 40s linear infinite;
         animation: marquee-right 40s linear infinite;
       }
+      
       .marquee-row.slower {
+        -webkit-animation-duration: 50s;
         animation-duration: 50s;
       }
+      
+      /* Mobile optimizations */
+      @media (max-width: 768px) {
+        .marquee-row {
+          -webkit-animation-duration: 20s;
+          animation-duration: 20s;
+        }
+        .marquee-row.slower {
+          -webkit-animation-duration: 30s;
+          animation-duration: 30s;
+        }
+      }
+      
+      /* Keyframes with Safari prefixes */
+      @-webkit-keyframes marquee-left {
+        0% { -webkit-transform: translateX(0); transform: translateX(0); }
+        100% { -webkit-transform: translateX(-50%); transform: translateX(-50%); }
+      }
+      
       @keyframes marquee-left {
         0% { transform: translateX(0); }
         100% { transform: translateX(-50%); }
       }
+      
+      @-webkit-keyframes marquee-right {
+        0% { -webkit-transform: translateX(-50%); transform: translateX(-50%); }
+        100% { -webkit-transform: translateX(0); transform: translateX(0); }
+      }
+      
       @keyframes marquee-right {
         0% { transform: translateX(-50%); }
         100% { transform: translateX(0); }
       }
+      
+      /* House rules button animation */
       .house-rules-btn {
+        -webkit-animation: pulse-red 2s infinite;
         animation: pulse-red 2s infinite;
       }
+      
+      @-webkit-keyframes pulse-red {
+        0%, 100% { 
+          -webkit-transform: scale(1);
+          transform: scale(1);
+          -webkit-box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        50% { 
+          -webkit-transform: scale(1.05);
+          transform: scale(1.05);
+          -webkit-box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+          box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        }
+      }
+      
       @keyframes pulse-red {
         0%, 100% { 
           transform: scale(1);
@@ -39,23 +112,38 @@
           box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
         }
       }
+      
+      /* Mobile-specific optimizations */
+      @media (max-width: 480px) {
+        .house-rules-btn {
+          font-size: 14px;
+          padding: 12px 20px;
+        }
+      }
+      
+      @media (max-width: 360px) {
+        .house-rules-btn {
+          font-size: 12px;
+          padding: 10px 16px;
+        }
+      }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-400 to-purple-500 min-h-screen flex flex-col items-center justify-center p-8">
+<body class="bg-gradient-to-br from-indigo-400 to-purple-500 min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden">
     <div id="marquee-bg" class="fixed inset-0 -z-10 w-full h-full" aria-hidden="true"></div>
     
     <!-- Welcome Message - Fixed at Top -->
-    <div class="fixed top-0 left-0 right-0 text-center py-4 px-4 z-20 bg-gradient-to-b from-black/30 to-transparent">
-        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
+    <div class="fixed top-0 left-0 right-0 text-center py-2 sm:py-4 px-4 z-20 bg-gradient-to-b from-black/30 to-transparent">
+        <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white drop-shadow-lg">
             Welcome To Our Home! 🏠
         </h1>
     </div>
     
     <!-- House Rules Button - Mobile Responsive -->
-    <div class="fixed bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 z-10 px-4">
+    <div class="fixed bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 z-10 px-4 w-full max-w-sm sm:max-w-md">
         <button 
             id="house-rules-btn" 
-            class="house-rules-btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-full shadow-lg text-base sm:text-lg md:text-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-300 w-full sm:w-auto min-w-0"
+            class="house-rules-btn bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-full shadow-lg text-sm sm:text-base md:text-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-300 w-full touch-manipulation"
             aria-label="View House Rules"
         >
             ❗ HOUSE RULES ❗
