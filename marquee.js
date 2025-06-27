@@ -65,6 +65,71 @@ const imageUrls = [
 // Remove duplicates from imageUrls array
 const uniqueImageUrls = [...new Set(imageUrls)];
 
+// Lazy loading setup
+let imageObserver;
+
+// Initialize the Intersection Observer for lazy loading
+const initializeLazyLoading = () => {
+  const options = {
+    root: null, // Use viewport as root
+    rootMargin: '100px', // Start loading 100px before image comes into view
+    threshold: 0.1
+  };
+
+  imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        const src = img.getAttribute('data-src');
+        
+        if (src) {
+          // Create a new image to preload
+          const imageLoader = new Image();
+          
+          imageLoader.onload = () => {
+            // Once loaded, set the src and add fade-in effect
+            img.src = src;
+            img.removeAttribute('data-src');
+            img.classList.remove('lazy-loading');
+            img.classList.add('lazy-loaded');
+            
+            // Stop observing this image
+            imageObserver.unobserve(img);
+          };
+          
+          imageLoader.onerror = () => {
+            // Handle loading error with a placeholder or retry
+            img.classList.remove('lazy-loading');
+            img.classList.add('lazy-error');
+            imageObserver.unobserve(img);
+          };
+          
+          // Start loading the image
+          imageLoader.src = src;
+        }
+      }
+    });
+  }, options);
+};
+
+// Create placeholder image data URL (small gray rectangle)
+const createPlaceholder = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 192; // w-48
+  canvas.height = 112; // h-28
+  const ctx = canvas.getContext('2d');
+  
+  // Create gradient placeholder
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, '#f3f4f6');
+  gradient.addColorStop(1, '#e5e7eb');
+  
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  return canvas.toDataURL();
+};
+
 // Fisher-Yates shuffle algorithm
 const shuffleArray = (array) => {
   const shuffled = [...array];
@@ -125,12 +190,26 @@ const createMarqueeRow = (rowIndex, reverse = false, slower = false) => {
   row.style.marginBottom = '0.5rem';
   row.style.marginTop = '0.5rem';
   
-  randomizedImages.forEach((src) => {
+  const placeholder = createPlaceholder();
+  
+  randomizedImages.forEach((src, index) => {
     const img = document.createElement('img');
-    img.src = src;
+    
+    // Set up lazy loading
+    img.src = placeholder; // Start with placeholder
+    img.setAttribute('data-src', src); // Store real URL for lazy loading
     img.alt = '';
-    img.className = 'rounded-xl shadow-lg mx-2 w-48 h-28 object-cover select-none pointer-events-none';
+    img.className = 'rounded-xl shadow-lg mx-2 w-48 h-28 object-cover select-none pointer-events-none lazy-loading';
     img.setAttribute('draggable', 'false');
+    
+    // Add loading state styles
+    img.style.transition = 'opacity 0.3s ease-in-out';
+    
+    // Observe this image for lazy loading
+    if (imageObserver) {
+      imageObserver.observe(img);
+    }
+    
     row.appendChild(img);
   });
   
@@ -138,6 +217,9 @@ const createMarqueeRow = (rowIndex, reverse = false, slower = false) => {
 };
 
 const initializeMarquee = () => {
+  // Initialize lazy loading first
+  initializeLazyLoading();
+  
   const marqueeRows = [
     createMarqueeRow(0, false, false),
     createMarqueeRow(1, true, false),
@@ -156,6 +238,31 @@ initializeMarquee();
 
 // Reinitialize on window resize to adjust image count
 window.addEventListener('resize', () => {
+  // Disconnect existing observer
+  if (imageObserver) {
+    imageObserver.disconnect();
+  }
+  
   marqueeBg.innerHTML = '';
   initializeMarquee();
 });
+
+// Add CSS for lazy loading states
+const style = document.createElement('style');
+style.textContent = `
+  .lazy-loading {
+    opacity: 0.7;
+    filter: blur(1px);
+  }
+  
+  .lazy-loaded {
+    opacity: 1;
+    filter: none;
+  }
+  
+  .lazy-error {
+    opacity: 0.5;
+    background-color: #f3f4f6;
+  }
+`;
+document.head.appendChild(style);
