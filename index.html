@@ -4,11 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remove Your Shoes Sign</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .marquee-row {
+        display: flex;
+        width: max-content;
+        animation: marquee-left 30s linear infinite;
+      }
+      .marquee-row.reverse {
+        animation: marquee-right 40s linear infinite;
+      }
+      .marquee-row.slower {
+        animation-duration: 50s;
+      }
+      @keyframes marquee-left {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      @keyframes marquee-right {
+        0% { transform: translateX(-50%); }
+        100% { transform: translateX(0); }
+      }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-400 to-purple-500 min-h-screen flex flex-col items-center justify-center p-8">
-    <button id="show-card-btn" class="mb-8 px-6 py-3 bg-white text-indigo-700 font-bold rounded-lg shadow hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400" tabindex="0" aria-label="Show Remove Your Shoes Card">Show Card</button>
+    <div id="marquee-bg" class="fixed inset-0 -z-10 w-full h-full" aria-hidden="true"></div>
     <div id="root"></div>
+    <script src="marquee.js"></script>
     <script src="card.js"></script>
 </body>
 </html>
