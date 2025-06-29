@@ -4,12 +4,17 @@ class Card {
     this.currentCardIndex = 0;
     this.touchStartX = 0;
     this.touchStartY = 0;
+    this.isMobile = this.checkIfMobile();
     this.render();
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleTouchStart = this.handleTouchStart.bind(this);
     this.handleTouchMove = this.handleTouchMove.bind(this);
     this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this.setupHouseRulesButton();
+  }
+
+  checkIfMobile() {
+    return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
   // House rules data
@@ -72,14 +77,14 @@ class Card {
     cardWrapper.id = this.cardId;
     cardWrapper.tabIndex = 0;
     cardWrapper.setAttribute('aria-label', 'House Rules Cards');
-    cardWrapper.className = `fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4 sm:p-8`;
+    cardWrapper.className = `fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-2 sm:p-4 md:p-8`;
     cardWrapper.style.display = 'none';
     
     const houseRules = this.getHouseRules();
     
     cardWrapper.innerHTML = `
-      <div class="bg-white rounded-2xl p-6 sm:p-8 md:p-10 shadow-2xl text-center max-w-sm sm:max-w-md w-full relative overflow-hidden outline-none max-h-[90vh] overflow-y-auto">
-        <button aria-label="Close" class="absolute top-2 sm:top-4 right-2 sm:right-4 text-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors touch-manipulation z-10" id="close-card-btn" tabindex="0">&times;</button>
+      <div class="bg-white rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 shadow-2xl text-center max-w-xs sm:max-w-sm md:max-w-md w-full relative overflow-hidden outline-none max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <button aria-label="Close" class="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 text-gray-400 hover:text-gray-700 active:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 w-10 h-10 sm:w-12 sm:h-12 md:w-10 md:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation z-10 text-lg sm:text-xl md:text-base" id="close-card-btn" tabindex="0">&times;</button>
         
         <div class="relative overflow-hidden">
           <div class="flex transition-transform duration-300 ease-in-out" id="cards-container" style="width: ${houseRules.length * 100}%; transform: translateX(0%);">
@@ -88,10 +93,10 @@ class Card {
         </div>
         
         <!-- Navigation Dots -->
-        <div class="flex justify-center mt-4 sm:mt-6 space-x-2" id="navigation-dots">
+        <div class="flex justify-center mt-3 sm:mt-4 md:mt-6 space-x-1.5 sm:space-x-2" id="navigation-dots">
           ${houseRules.map((_, index) => `
             <button 
-              class="w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-300 ${index === 0 ? 'bg-gray-600' : 'bg-gray-300'}" 
+              class="w-3 h-3 sm:w-2 sm:h-2 md:w-3 md:h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-300 touch-manipulation ${index === 0 ? 'bg-gray-600' : 'bg-gray-300'}" 
               data-index="${index}"
               aria-label="Go to rule ${index + 1}"
             ></button>
@@ -100,14 +105,14 @@ class Card {
         
         <!-- Navigation Arrows -->
         <button 
-          class="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors touch-manipulation" 
+          class="absolute left-1 sm:left-2 md:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700 active:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 w-12 h-12 sm:w-10 sm:h-10 md:w-10 md:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation text-xl sm:text-lg md:text-base" 
           id="prev-btn" 
           aria-label="Previous rule"
         >
           ‹
         </button>
         <button 
-          class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors touch-manipulation" 
+          class="absolute right-1 sm:right-2 md:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700 active:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 w-12 h-12 sm:w-10 sm:h-10 md:w-10 md:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation text-xl sm:text-lg md:text-base" 
           id="next-btn" 
           aria-label="Next rule"
         >
@@ -155,16 +160,16 @@ class Card {
     };
     
     return `
-      <div class="w-full flex-shrink-0 px-2" style="width: ${100 / this.getHouseRules().length}%;">
-        <div class="border-4 border-gray-100 rounded-xl p-4 sm:p-6 m-2">
-          <div class="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4 md:mb-5 animate-bounce">${rule.icon}</div>
-          <div class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 drop-shadow">${rule.title}</div>
-          <div class="text-sm sm:text-base text-gray-500 mb-4 sm:mb-5 md:mb-6 italic">${rule.subtitle}</div>
-          <div class="flex justify-center gap-3 sm:gap-4 md:gap-5 my-3 sm:my-4 md:my-5 text-lg sm:text-xl md:text-2xl">
+      <div class="w-full flex-shrink-0 px-1 sm:px-2" style="width: ${100 / this.getHouseRules().length}%;">
+        <div class="border-4 border-gray-100 rounded-xl p-3 sm:p-4 md:p-6 m-1 sm:m-2">
+          <div class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-2 sm:mb-3 md:mb-4 lg:mb-5 animate-bounce">${rule.icon}</div>
+          <div class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 mb-1 sm:mb-2 md:mb-3 drop-shadow leading-tight">${rule.title}</div>
+          <div class="text-xs sm:text-sm md:text-base text-gray-500 mb-3 sm:mb-4 md:mb-5 lg:mb-6 italic">${rule.subtitle}</div>
+          <div class="flex justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-5 my-2 sm:my-3 md:my-4 lg:my-5 text-base sm:text-lg md:text-xl lg:text-2xl">
             <span class="animate-pulse opacity-70">${rule.emoji}</span>
             <span class="animate-pulse opacity-70 delay-150">${rule.emoji}</span>
           </div>
-          <div class="font-semibold px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-full border-2 text-sm sm:text-base ${colorClasses[rule.color]}">${rule.content}</div>
+          <div class="font-semibold px-2 sm:px-3 md:px-4 lg:px-6 py-1.5 sm:py-2 md:py-2 lg:py-3 rounded-full border-2 text-xs sm:text-sm md:text-base leading-relaxed ${colorClasses[rule.color]}">${rule.content}</div>
         </div>
       </div>
     `;
@@ -186,6 +191,8 @@ class Card {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     document.body.style.height = '100%';
+    document.body.style.top = '0';
+    document.body.style.left = '0';
   }
 
   hide() {
@@ -198,6 +205,8 @@ class Card {
     document.body.style.position = '';
     document.body.style.width = '';
     document.body.style.height = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
   }
 
   nextCard() {
@@ -285,8 +294,9 @@ class Card {
     const diffX = this.touchStartX - touchEndX;
     const diffY = this.touchStartY - touchEndY;
     
-    // Check if it's a horizontal swipe
-    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+    // Check if it's a horizontal swipe (reduced threshold for mobile)
+    const swipeThreshold = this.isMobile ? 30 : 50;
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > swipeThreshold) {
       if (diffX > 0) {
         this.nextCard();
       } else {
